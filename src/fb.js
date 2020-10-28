@@ -8,22 +8,23 @@ const config = {
 }
 
 firebase.initializeApp(config)
+const db = firebase.database();
 
 function subscribe(coords, callback) {
     const chatId = generateId(coords);
-    firebase.database().ref(`messages/${chatId}`)
+    db.ref(`messages/${chatId}`)
             .on('value', (snapshot) => {
-                console.log(Object.entries(snapshot.val()))
-                const values = Object.entries(snapshot.val());
-                callback(values.map(([key, value]) => ({id: key, ...value})));
+                const values = snapshot.val();
+                if (!values) return
+                callback(Object.entries(values).map(([key, value]) => ({id: key, ...value})));
             })
 
-    return () => firebase.database().ref(`messages/${chatId}`).off();
+    return () => db.ref(`messages/${chatId}`).off();
 }
 
 function addMessage(coords, message) {
     const chatId = generateId(coords);
-    firebase.database().ref(`messages/${chatId}`).push({
+    db.ref(`messages/${chatId}`).push({
         date: Date.now(),
         ...message,
     })
