@@ -2,15 +2,16 @@ import React, {useState, useEffect, useRef} from 'react'
 import {useErrorHandler} from 'react-error-boundary'
 import 'milligram';
 import { subscribe, addMessage } from './fb';
+import { useLayoutEffect } from 'react';
 
 const whatchPositionOptions = {enableHighAccuracy: false, timeout: 50000,
     maximumAge: 0};
 function Chat() {
-    const coords = useGeolocation(whatchPositionOptions);
+    const coords = useGeolocation(whatchPositionOptions)
     const [messages, setMessages] = useState([]);
     const [username, setUsername] = useLocalStorageState('chat-username');
     const messageBoxRef = useRef();
-    useStickyContainer(messageBoxRef)
+    useStickyContainer(messageBoxRef, messages, username)
 
     useEffect(() => {
         if (!coords) return;
@@ -59,13 +60,12 @@ function Chat() {
 export default Chat
 
 function Message({message, username}) {
-    const isSeen = message?.seen.includes(username)
     return (
-        <div style={{backgroundColor: isSeen ? 'transparent' : '#efefef', padding: '5px'}}>
-        <div style={{backgroundColor: message.author === username ? '#9b4dca' : '#efefef',
+        <div style={{backgroundColor: message.author === username ? '#9b4dca' : 'lightblue',
                     color: message.author === username ? '#fff' : '#606c76',
                     width: '400px',
                     padding: '5px 10px',
+                    margin: '5px',
                     borderRadius: '10px'}}>
             <span style={{ fontSize: '1.6rem',
                            fontWeight: 'bold'}}>
@@ -73,11 +73,11 @@ function Message({message, username}) {
             </span>
             <span style={{fontSize: '1.2rem'}}>{message.text}</span>
         </div>
-        </div>
     )
 }
 
-function useLocalStorageState(key, initialState = '', {serialize = JSON.stringify, deserialize = JSON.parse} = {}) {
+function useLocalStorageState(key, initialState = '',
+    {serialize = JSON.stringify, deserialize = JSON.parse} = {}) {
     const [state, setState] = useState(() => {
         let localStorage = window.localStorage.getItem(key);
         if(localStorage) {
@@ -115,10 +115,24 @@ function useGeolocation(options) {
     return state;
 }
 
-function useStickyContainer(boxRef) {
-    // have a state to see if the container stuck to the bottom (intially set to true)
+function useStickyContainer(boxRef, messages, username) {
+    const [stuck, setStuck] = useState();
 
-    // if not update the state acordingly
+    useEffect(() => {
+        const currentBox = boxRef.current;
+        const {scrollTop, scrollHeight, clientHeight} = currentBox;
+        const trashold = 100;
+        if ((scrollTop + clientHeight + trashold) >= scrollHeight) {
+            setStuck(true);
+        } else {
+            setStuck(false)
+        }
+    }, [boxRef, messages])
 
-
+    useLayoutEffect(() => {
+        const currentBox = boxRef.current;
+        if (stuck) {
+            currentBox.scroll(0, currentBox.scrollHeight)
+        }
+    })
 }

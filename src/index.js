@@ -14,10 +14,8 @@ function ErrorFallback({error, resetErrorBoundary}) {
 }
 
 ReactDOM.render(
-  <React.StrictMode>
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Chat />
-    </ErrorBoundary>
-  </React.StrictMode>,
+    </ErrorBoundary>,
   document.getElementById('root')
 );
