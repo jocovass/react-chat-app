@@ -42,11 +42,11 @@ function Chat() {
             <input className="button-primary" type="submit" value="Send" />
         </form>
         <pre>
-            <code>
+            <code data-testid='coords'>
             {coords ? JSON.stringify(coords, null, 2) : 'NO LOCATION DATA'}
             </code>
         </pre>
-        <div ref={messageBoxRef} id="box" style={{border: '2px solid #d1d1d1', borderRadius: '5px', height: '220px', overflowY: 'scroll'}}>
+        <div ref={messageBoxRef} id="box" data-testid="box" style={{border: '2px solid #d1d1d1', borderRadius: '5px', height: '220px', overflowY: 'scroll'}}>
             {messages.length ? (
             messages.map(message => {
                 return <Message message={message} username={username} key={message.id} />
@@ -136,3 +136,13 @@ function useStickyContainer(boxRef, messages, username) {
         }
     })
 }
+
+export function ErrorFallback({error, resetErrorBoundary}) {
+    return (
+      <div role="alert">
+        <p>Something went wrong:</p>
+        <pre>{error.message}</pre>
+        <button onClick={resetErrorBoundary}>Try again</button>
+      </div>
+    )
+  }
